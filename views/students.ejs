@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <%-include layouts/header %>
+  </head>
+  <body>
+    <%- include layouts/menu-bar%>
+    <div class="col-md-8 col-md-offset-2">
+      <h2 class="text-center">STUDENTS TABLE</h2>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Action</th>
+            <th>Option</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% var no = 1%>
+          <% data.forEach(row => { %>
+            <tr>
+              <td><%= no++%></td>
+              <td><%= row.first_name%></td>
+              <td><%= row.last_name%></td>
+              <td><%= row.email%></td>
+              <td><a class="button_2" href="/students/addSubject/<%= row.id%>"><button type="button" class="btn btn-info">Add Subject</button></a></td>
+              <td>
+                <a class="button_2" href="/students/edit/<%= row.id%>"><button type="button" class="btn btn-primary">Edit</button></a>
+                <a href="/students/delete/<%= row.id%>" onclick="return confirm('Are you sure want to delete this student?');"><button type="button" class="btn btn-danger">Delete</button></a>
+              </td>
+            </tr>
+          <%})%>
+        </tbody>
+      </table>
+      <a href="students/add"><button type="button" class="btn btn-success">Add</button></a>
+    </div>
+  </body>
+
+</html>
