@@ -1,4 +1,3 @@
-# sequelize-intro
+# sequelize-intro-2
 
-#release 0 di master
-#assoc di branch tugas 1
+
