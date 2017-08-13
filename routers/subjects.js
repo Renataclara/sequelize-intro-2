@@ -1,163 +1,86 @@
-'use strict'
-
-const express = require('express');
-const router = express.Router();
-const model = require('../models');
+var express = require('express')
+var router = express.Router();
+var Model = require('../models');
 const giveLetter = require('../helpers/score')
 
-router.use((req,res, next)=>{
-  if(req.session.user.role == 'academic' || req.session.user.role == 'headmaster'){
-    next();
-  }else{
-    res.send('harus login sebagai academic or headmaster');
+router.use((req, res, next) => {
+  if (req.session.user.role == 'academic' || req.session.user.role == 'headmaster') { // undefined
+    next()
+  } else {
+    res.send("woi jd academic atau headmaster dlu yaaa...")
   }
-})
+});
 
-
-router.get('/', function(req,res){
-  model.Subjects.findAll()
-  .then(function(rowsSubject){
-    let promises = rowsSubject.map(subject => {
-      return new Promise(function(resolve, reject){
+router.get('/', function(req, res){
+  Model.Subject.findAll()
+  .then (arrSubject => {
+    let promiseSubject = arrSubject.map( subject => {
+      return new Promise( function (resolve, reject) {
         subject.getTeachers()
-        .then(teacher => {
-          subject.first_name = [];
-          subject.subject_name = subject.subject_name
-          teacher.forEach(name => {
-            subject.first_name.push(name.dataValues.first_name +' '+ name.dataValues.last_name)
-
+        .then( teacher => {
+          subject.first_name =[];
+          teacher.forEach(teacher => {
+            subject.first_name.push(teacher.dataValues.first_name+' '+teacher.dataValues.last_name)
           })
-          return resolve(subject)
+          return resolve(subject);
         })
-        .catch(err => reject(err));
-      })
+        .catch(err => reject (err));
+      });
+    });
+
+    Promise.all(promiseSubject)
+    .then( subject => {
+      console.log(subject);
+      res.render('subject', {data_subject: subject, title: 'Subject', role: req.session.user.role});
     })
-    Promise.all(promises)
-    .then(function(subject){
-      res.render('subjects', {data:subject, title: 'list Subject', role: req.session.user.role})
+    .catch(err => {
+      console.log(err);
     })
   })
-  })
+});
 
-  // router.get('/', function(req, res){
-  //   model.Subjects.findAll({
-  //     include:[{all:true}]
-  //   })
-  //   .then(function(rows){
-  //     res.render('subjects', {data:rows});
-  //   })
-  // })
-
-  router.get('/add', function(req,res){
-    res.render('subjectsAdd', {title: 'Add Subject'})
-  })
-
-router.post('/add', function(req,res){
-  model.Subjects.create({
-    subject_name: req.body.subject_name
-  })
-  .then(function(){
-    res.redirect('/subjects')
-  })
-})
-
-router.get('/delete/:id', function(req,res){
-  model.Subjects.destroy({
-    where:{
-      id: req.params.id
-    }
-  })
-  .then(function(){
-    res.redirect('/subjects')
-  })
-})
-
-
-router.get('/enroll/:id', function(req, res){
-  model.StudentSubjects.findAll({
-    order:[['Student', 'first_name']],
+router.get('/enrolledstudents/:id', function(req, res){
+  Model.StudentSubject.findAll({ order: [['Student', 'first_name']],
     where: {
       SubjectId: req.params.id
     },
-    include:[{all:true}]
+    include: [{all:true}]
   })
-  .then(function(rows){
-      let letter = giveLetter(rows);
-      res.render('enroll', {data:rows, title: 'Enroll Subject', scoreLetter: letter})
+  .then(function (rows){
+    let letter = giveLetter(rows);
+    res.render('enrolledStudent', {data_subjectstudent:rows, title: 'Enrolled Student Data', scoreLetter: letter})
   })
-})
+});
 
-router.get('/givescore/:id/:ids', function(req, res){
-  model.StudentSubjects.findAll({
-    where: {
-      StudentId: req.params.id,
-      $and: {
-        SubjectId: req.params.ids
-      }
-    },
-    include:[{all:true}]
-  })
-  .then(function(row){
-    res.render('givescore', {data:row[0], title: 'Give Score'})
-  })
-})
+ router.get('/givescore/:id/:ids', function(req, res){
+   Model.StudentSubject.findAll({
+     where: {
+       StudentId: req.params.id,
+       $and: {
+         SubjectId: req.params.ids
+       }
+     },
+     include: [{all:true}]
+   })
+   .then(function (rows){
+     res.render('givescore', {data:rows, title: 'Give Score to Student'})
+   })
+ });
 
-router.post('/givescore/:id/:ids', function(req, res){
-  model.StudentSubjects.update({
-    score: req.body.score,
-    updateAt: new Date()
-  },{
-    where:{
-      StudentId: req.params.id,
-      $and: {
-        SubjectId: req.params.ids
-      }
-    }
-  })
-  .then(function(){
-    res.redirect(`/subjects/enroll/${req.params.ids}`)
-  })
-})
+ router.post('/givescore/:id/:ids', function(req, res){
+   Model.StudentSubject.update({ Score: req.body.score}, {
+     where: {
+       StudentId: req.params.id,
+       $and: {
+         SubjectId: req.params.ids
+       }
+     }
+   })
+   .then(function (rows){
+     res.redirect(`/subjects/enrolledstudents/${req.params.ids}`);
+   })
+ });
 
-// no 7 example
-// model.Subject.findOne()
-// .then(function(subject){
-//   subject.getStudents()
-//   .then(function(student){
-//     student.forEach(name => {
-//       console.log(name);
-//     })
-//   })
-// })
-
-//d table conjunction tambah score
-//dr conjunction include a dan b
-//example join include
-// db.pupilClub.findAll({
-//   include: [{all: true}]
-// })
-// .then(row => {
-//   row.forEach(pc => {
-//     console.log(pc);
-//   })
-// })
-
-
-// router.get('/enroll/:id', function(req,res){
-//   model.Subjects.findById(req.params.id)
-//   .then(function(row){
-//     row.getStudents()
-//     .then(function(students){
-//       res.render('enroll', {data:row, data2:students})
-//     })
-//   })
-// })
-
-
-  // model.Subjects.findAll()
-  // .then(function(rows){
-  //   res.render('subjects', {data: rows});
-  // })
 
 
 module.exports = router;

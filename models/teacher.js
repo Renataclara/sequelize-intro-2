@@ -6,9 +6,15 @@ module.exports = function(sequelize, DataTypes) {
     email: DataTypes.STRING,
     SubjectId: DataTypes.INTEGER
   });
-
-  Teacher.associate = (models) => {
-    Teacher.belongsTo(models.Subjects)
-  }
+    Teacher.associate =(models) => {
+      Teacher.belongsTo(models.Subject);
+    }
   return Teacher;
 };
+
+// };
+//
+//  Profil.associate =(models) =>
+//  hasOne(models.Address);
+// }
+// return profile

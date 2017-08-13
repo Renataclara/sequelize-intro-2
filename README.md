@@ -1,4 +1,2 @@
 # sequelize-intro
-
-#release 0 di master
-#assoc di branch tugas 1
+hacktiv8 week 3 Kamis

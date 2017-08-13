@@ -1,111 +1,48 @@
-'use strict'
-
 const express = require('express');
-const app = express();
-const model = require('./models');
-const path = require('path');
-const bodyParser = require('body-parser');
-const session = require('express-session')
-// var Sequelize = require('sequelize');
-// var sequelize = new Sequelize('tugaskamis', 'postgres', 'posting', {dialect: 'postgres'});
+var app = express();
+var path = require('path');
+var bodyParser = require('body-parser');
+var session = require('express-session')
 
+var Teacher = require('./models/teacher');
+var Subject = require('./models/subject');
+var Student = require('./models/student');
 
-const teachers = require('./routers/teachers');
-const subjects = require('./routers/subjects');
-const students = require('./routers/students');
-const index = require('./routers/index');
-
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended:true}));
-app.set('view engine','ejs');
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'))
 
 app.use(session({
-  secret: 'hacktiv',
+  secret: 'hacktiv8',
   resave: false,
-  saveUnitialized: true,
+  saveUninitialized: true,
   cookie: {}
 }))
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended : true}));
 
-//d router
-// router.use((req,res, next)=>{
-//   if(req.session.user){
-//     next();
-//   }else{
-//     res.sendStatus(403);
-//   }
-// })
+const teacher = require('./routers/teachers')
+const subject = require('./routers/subjects')
+const student = require('./routers/students')
+const home = require('./routers/home')
+const signup = require('./routers/signup')
 
-// router.get('/login', function(req, res , next){
-//   let username = req.query.username;
-//   let password = req.query.password;
-//
-//   if(username == 'ganang' && password == 'gakmakan'){
-//     req.session.user = {
-//       username: username,
-//       password: password,
-//       role: 'OB'
-//     }
-//     res.redirect('/users')
-//   }else {
-//     res.send('pass salah')
-//   }
-// })
+app.use('/', home);
+app.use('/signup', signup);
 
-//npm install --save express-session
-// app.use(session({
-//   secret: 'hacktiv',
-//   resave: false,
-//   saveUnitialized: true,
-//   cookie: {}
-// }))
-
-// app.use((req,res,next) =>{
-//   req.name = 'acim';
-//
-//   if(req.name != 'acim'){
-//     console.log('name is not acim');
-//   }else {
-//     next();
-//   }
-// })
-
-
-app.use('/', index)
-
-app.use((req,res, next)=>{
-  if(req.session.user){
-    next();
-  }else{
-    res.render('login', {title:'login', msg: 'anda harus login'});
+app.use((req, res, next) => {
+  if (req.session.user) { // undefined
+    next()
+  } else {
+    res.render('home', {title:'login', msg: 'anda harus login'})
   }
-})
+});
+
+app.use('/signup', signup);
+app.use('/teachers', teacher);
+app.use('/subjects', subject);
+app.use('/students', student);
 
 
 
-
-app.use('/teachers', teachers)
-// app.use('/teachers/test', teachers)
-app.use('/subjects', subjects)
-// app.use('/subjects/add', subjects)
-// app.use('/subjects/enroll/:id', subjects)
-// app.use('/subjects/givescore/:id/:ids', subjects)
-app.use('/students', students)
-// app.use('/students/add', students)
-// app.use('/students/delete/:id', students)
-// app.use('/students/edit/:id', students)
-
-
-// app.get('/test', function(req, res){
-//   sequelize.query("SELECT * FROM Students", { type:Sequelize.QueryTypes.SELECT})
-//    .then(function(properties) {
-//       res.json(properties)
-//   })
-// })
-
-
-
-
-
-app.listen(process.env.PORT || 8000);
+app.listen(process.env.PORT || 3000);
