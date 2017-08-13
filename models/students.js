@@ -9,21 +9,6 @@ module.exports = function(sequelize, DataTypes) {
         isEmail:{
           msg: "Must be email format"
         }
-        // ,
-        // cekEmail:(value, next) =>{
-        //   Students.findOne({
-        //     where:{
-        //       email: value
-        //     }
-        //   }).then(function(row){
-        //     if(row != null){
-        //       console.log();
-        //       return next('email sudah d pake');
-        //     }else {
-        //       return next();
-        //     }
-        //   })
-        // }
       }
     },
     jurusan: DataTypes.STRING

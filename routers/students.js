@@ -146,6 +146,8 @@ router.post('/edit/:id', function(req, res){
 })
 })
 
+//// later 
+
 router.get('/addSubject/:id', function(req, res){
   model.Students.findById(req.params.id)
   .then(function(rows){
